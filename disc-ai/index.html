@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discipleship Growth Assessment</title>
+<style>
+:root {
+  --bg: #F5F2EC;
+  --surface: #FFFFFF;
+  --primary: #1C3A2E;
+  --primary-light: #E8F3ED;
+  --accent: #B87333;
+  --accent-light: #FBF0E6;
+  --text: #2A2A25;
+  --muted: #6B6960;
+  --border: rgba(42,42,37,0.14);
+  --green: #1D9E75;
+  --green-light: #E1F5EE;
+  --amber: #BA7517;
+  --amber-light: #FAEEDA;
+  --coral: #D85A30;
+  --coral-light: #FAECE7;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 16px; line-height: 1.6; }
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+.app-header { background: var(--primary); color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.app-logo { font-size: 13px; font-weight: 500; opacity: .85; }
+.app-progress { font-size: 12px; opacity: .7; }
+.progress-track { height: 3px; background: rgba(255,255,255,0.2); flex-shrink: 0; }
+.progress-fill { height: 100%; background: var(--accent); transition: width .4s ease; }
+.main { flex: 1; padding: 24px 20px; max-width: 600px; margin: 0 auto; width: 100%; }
+h2 { font-family: Georgia, serif; font-size: 20px; font-weight: normal; color: var(--primary); margin-bottom: 6px; }
+.field-label { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; display: block; }
+input[type="text"] { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 16px; background: var(--surface); color: var(--text); outline: none; margin-bottom: 20px; transition: border-color .15s; font-family: inherit; }
+input[type="text"]:focus { border-color: var(--primary); }
+.btn-primary { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity .15s; font-family: inherit; display: block; }
+.btn-primary:hover { opacity: .9; }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn-outline { width: 100%; padding: 12px; background: transparent; color: var(--primary); border: 1px solid var(--primary); border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; margin-top: 10px; transition: all .15s; font-family: inherit; display: block; }
+.btn-outline:hover { background: var(--primary-light); }
+.section-badge { display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 500; background: var(--primary-light); color: var(--primary); margin-bottom: 10px; }
+.section-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+.question-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; margin-bottom: 12px; }
+.question-text { font-family: Georgia, serif; font-size: 15px; color: var(--text); margin-bottom: 14px; line-height: 1.6; }
+.scale-row { display: flex; gap: 6px; }
+.scale-btn { flex: 1; padding: 8px 4px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; font-size: 13px; cursor: pointer; color: var(--muted); transition: all .15s; text-align: center; font-family: inherit; }
+.scale-btn:hover { border-color: var(--primary); color: var(--primary); }
+.scale-btn.s1 { background: var(--coral-light); border-color: var(--coral); color: var(--coral); font-weight: 500; }
+.scale-btn.s2 { background: var(--amber-light); border-color: var(--amber); color: var(--amber); font-weight: 500; }
+.scale-btn.s3 { background: #E6F1FB; border-color: #378ADD; color: #185FA5; font-weight: 500; }
+.scale-btn.s4 { background: var(--green-light); border-color: var(--green); color: var(--green); font-weight: 500; }
+.scale-btn.s5 { background: var(--primary-light); border-color: var(--primary); color: var(--primary); font-weight: 500; }
+.scale-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+.nav-row { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+.btn-back { padding: 10px 20px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; font-size: 14px; cursor: pointer; color: var(--muted); font-family: inherit; }
+.btn-next { padding: 10px 28px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity .15s; margin-left: auto; }
+.btn-next:disabled { opacity: .4; cursor: not-allowed; }
+.loading-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+.spinner { width: 44px; height: 44px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 24px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.score-name { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.score-num { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+.score-bar { height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.score-fill { height: 100%; border-radius: 2px; }
+.plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+.plan-content { font-size: 14px; color: var(--text); line-height: 1.9; white-space: pre-wrap; font-family: Georgia, serif; }
+.info-box { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 16px; margin-bottom: 16px; font-size: 14px; color: #5A3A10; line-height: 1.6; }
+.report-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 10px; }
+.report-title { font-size: 13px; font-weight: 500; color: var(--primary); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.answer-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.answer-q { font-size: 13px; color: var(--text); flex: 1; line-height: 1.5; }
+.answer-score { font-size: 12px; font-weight: 500; min-width: 32px; text-align: center; padding: 3px 6px; border-radius: 4px; flex-shrink: 0; }
+.a1 { background: var(--coral-light); color: var(--coral); }
+.a2 { background: var(--amber-light); color: var(--amber); }
+.a3 { background: #E6F1FB; color: #185FA5; }
+.a4 { background: var(--green-light); color: var(--green); }
+.a5 { background: var(--primary-light); color: var(--primary); }
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.eyebrow { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+  #screen-results { display: flex !important; }
+  .screen:not(#screen-results) { display: none !important; }
+  .question-card, .report-section, .plan-card, .score-card { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- Welcome -->
+<div class="screen active" id="screen-welcome">
+  <div style="background:var(--primary);padding:44px 20px 36px;text-align:center;">
+    <div style="width:64px;height:64px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    </div>
+    <h1 style="font-family:Georgia,serif;color:white;font-size:24px;font-weight:normal;margin-bottom:8px;line-height:1.3;">Discipleship Growth Assessment</h1>
+    <p style="color:rgba(255,255,255,0.6);font-size:13px;">24 questions &nbsp;·&nbsp; About 8 minutes</p>
+  </div>
+  <div class="main" style="padding-top:30px;">
+    <p style="font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;">This assessment helps you honestly see where you are growing in your walk with Jesus — and where the Spirit might be inviting you to go deeper. There are no right or wrong answers, only honest ones.</p>
+    <label class="field-label" for="coachee-name">Your first name</label>
+    <input type="text" id="coachee-name" placeholder="Enter your first name" oninput="checkName()" autocomplete="given-name">
+    <button class="btn-primary" id="btn-start" onclick="startAssessment()" disabled>Begin assessment</button>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;">Your answers are private. At the end you can choose to share your report with your coach.</p>
+  </div>
+</div>
+
+<!-- Assessment -->
+<div class="screen" id="screen-assessment">
+  <div class="app-header">
+    <span class="app-logo">Discipleship Assessment</span>
+    <span class="app-progress" id="sec-progress">Section 1 of 6</span>
+  </div>
+  <div style="background:var(--primary);">
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:16%"></div></div>
+  </div>
+  <div class="main" style="padding-top:20px;">
+    <span class="section-badge" id="sec-badge">Section 1 of 6</span>
+    <h2 id="sec-title"></h2>
+    <p class="section-desc" id="sec-desc"></p>
+    <div id="q-container"></div>
+    <div class="nav-row">
+      <button class="btn-back" id="btn-back" onclick="prevSec()" style="display:none">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="nextSec()" disabled>Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generating -->
+<div class="screen" id="screen-gen">
+  <div class="app-header"><span class="app-logo">Discipleship Assessment</span></div>
+  <div class="loading-center">
+    <div class="spinner"></div>
+    <h2 style="font-family:Georgia,serif;font-weight:normal;color:var(--primary);margin-bottom:8px;">Building your plan</h2>
+    <p style="font-size:14px;color:var(--muted);" id="load-msg">Reviewing your answers...</p>
+  </div>
+</div>
+
+<!-- Results -->
+<div class="screen" id="screen-results">
+  <div style="background:var(--primary);padding:24px 20px;">
+    <p style="color:rgba(255,255,255,0.6);font-size:12px;margin-bottom:4px;">Discipleship Growth Assessment</p>
+    <h1 style="font-family:Georgia,serif;color:white;font-size:22px;font-weight:normal;margin-bottom:0;" id="results-heading">Your results</h1>
+  </div>
+  <div class="main" style="padding-top:24px;" id="results-body"></div>
+</div>
+
+<script>
+const SECS = [
+  { title:'Gospel knowledge', color:'#1D9E75', desc:'Measures your gospel fluency \u2014 from knowing the facts to living in light of the good news naturally.', questions:[
+    'I can clearly explain the core gospel message \u2014 Jesus\u2019 life, death, resurrection, and what it means for my life.',
+    'When I face anxiety, conflict, or disappointment, I naturally turn to gospel truth rather than reacting from fear or performance.',
+    'I see Jesus as the answer to my deepest needs for identity, security, and purpose \u2014 not just as Savior from eternal consequences.',
+    'I can help someone else identify a false belief they carry and point them toward the gospel in everyday conversation.'
+  ]},
+  { title:'Character & fruit', color:'#378ADD', desc:'Evaluates evidence of inner transformation \u2014 the fruit of God\u2019s work visible in your everyday life.', questions:[
+    'People who know me well would say I respond to frustrating situations with patience rather than reactive anger.',
+    'I practice honesty about my struggles while still pursuing growth \u2014 I live authentically rather than performing for others\u2019 approval.',
+    'I show genuine compassion to people in need without expecting anything in return.',
+    'My spiritual disciplines (prayer, Scripture, sabbath, solitude) feel like life-giving practices rather than obligations I must perform.'
+  ]},
+  { title:'Skills & mission', color:'#D85A30', desc:'Assesses active engagement in kingdom mission \u2014 living sent in your everyday spheres of influence.', questions:[
+    'I am intentionally present with people in my neighborhood, workplace, or community in ways that reflect Christ\u2019s love.',
+    'I can share the gospel naturally in conversation \u2014 it doesn\u2019t feel like a script I recite but a story I live.',
+    'I understand my spiritual gifts and actively use them to serve others and strengthen my church community.',
+    'I can feed and lead myself spiritually \u2014 I don\u2019t depend entirely on a pastor or program to grow.'
+  ]},
+  { title:'Relationships', color:'#7F77DD', desc:'Measures your capacity to attach deeply to God and others across life\u2019s everyday spaces.', questions:[
+    'I have 1\u20133 people who know my full story and walk closely with me \u2014 I am not doing the Christian life alone.',
+    'My relationship with Jesus feels like abiding and remaining in Him \u2014 not just attending church or keeping up religious habits.',
+    'I am growing in my ability to connect authentically with people in my small group or church community.',
+    'I practice mutual accountability \u2014 I invite correction and offer it to others with grace, not judgment.'
+  ]},
+  { title:'Life application', color:'#BA7517', desc:'Looks at actual transformation in daily life \u2014 not just what you know, but how you live.', questions:[
+    'In the past 3 months, I can point to a specific area of my life where my behavior has genuinely changed because of my faith.',
+    'My values around integrity, generosity, and service show up in decisions at work, at home, and with money \u2014 not just at church.',
+    'I respond to both success and failure with gospel-grounded security rather than pride or shame.',
+    'People outside the church who know me would notice something different about the way I live \u2014 my peace, generosity, or how I treat others.'
+  ]},
+  { title:'Reproduction', color:'#993556', desc:'Assesses whether transformation is multiplying \u2014 are you investing in others who will invest in others?', questions:[
+    'I am currently investing intentionally in at least one person\u2019s spiritual growth \u2014 not just a friendship, but walking alongside them.',
+    'The people I spend time with spiritually are growing in their own ability to apply the gospel and invest in others.',
+    'I open my own life rhythms to others \u2014 not just meeting in structured settings but inviting them into my everyday life.',
+    'Stories of life transformation through discipleship are a natural part of my conversations with other believers.'
+  ]}
+];
+
+let curSec = 0;
+let answers = Array.from({length:6}, () => Array(4).fill(0));
+let coacheeName = '';
+let generatedPlan = '';
+
+function checkName() {
+  document.getElementById('btn-start').disabled = document.getElementById('coachee-name').value.trim().length < 2;
+}
+
+function startAssessment() {
+  coacheeName = document.getElementById('coachee-name').value.trim();
+  curSec = 0;
+  show('screen-assessment');
+  renderSec();
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function renderSec() {
+  const s = SECS[curSec];
+  document.getElementById('sec-badge').textContent = `Section ${curSec+1} of 6`;
+  document.getElementById('sec-title').textContent = s.title;
+  document.getElementById('sec-desc').textContent = s.desc;
+  document.getElementById('sec-progress').textContent = `Section ${curSec+1} of 6`;
+  document.getElementById('prog').style.width = Math.round((curSec+1)/6*100)+'%';
+  document.getElementById('btn-back').style.display = curSec > 0 ? '' : 'none';
+  document.getElementById('q-container').innerHTML = s.questions.map((q,qi) => {
+    const cur = answers[curSec][qi];
+    return `<div class="question-card">
+      <p class="question-text">${qi+1}. ${q}</p>
+      <div class="scale-row">${[1,2,3,4,5].map(v =>
+        `<button class="scale-btn${cur===v?' s'+v:''}" onclick="pick(${qi},${v},this)">${v}</button>`
+      ).join('')}</div>
+      <div class="scale-labels"><span>Rarely true</span><span>Very true</span></div>
+    </div>`;
+  }).join('');
+  checkNext();
+}
+
+function pick(qi, v, btn) {
+  answers[curSec][qi] = v;
+  btn.closest('.scale-row').querySelectorAll('.scale-btn').forEach(b => b.className='scale-btn');
+  btn.classList.add('s'+v);
+  checkNext();
+}
+
+function checkNext() {
+  document.getElementById('btn-next').disabled = !answers[curSec].every(a => a > 0);
+}
+
+function nextSec() {
+  if (curSec < 5) { curSec++; renderSec(); } else { generate(); }
+}
+function prevSec() {
+  if (curSec > 0) { curSec--; renderSec(); }
+}
+
+function score(si) {
+  return Math.round(answers[si].reduce((a,b)=>a+b,0)/20*100);
+}
+
+async function generate() {
+  show('screen-gen');
+  const msgs = ['Reviewing your answers...','Identifying your growth areas...','Building your personal plan...','Almost ready...'];
+  let mi = 0;
+  const iv = setInterval(() => {
+    mi = (mi+1) % msgs.length;
+    document.getElementById('load-msg').textContent = msgs[mi];
+  }, 2500);
+
+  const scores = SECS.map((s,i) => ({ name: s.title, pct: score(i) }));
+
+  try {
+    const res = await fetch('/.netlify/functions/generate-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: coacheeName, scores, answers })
+    });
+    const data = await res.json();
+    generatedPlan = data.plan || '';
+  } catch(e) {
+    generatedPlan = '';
+  }
+
+  clearInterval(iv);
+  showResults();
+}
+
+function showResults() {
+  show('screen-results');
+  const scores = SECS.map((_,i) => score(i));
+  const sorted = [...scores.map((p,i)=>({p,i}))].sort((a,b)=>a.p-b.p);
+  const low1 = SECS[sorted[0].i].title;
+  const low2 = SECS[sorted[1].i].title;
+  document.getElementById('results-heading').textContent = coacheeName + '\u2019s results';
+
+  document.getElementById('results-body').innerHTML = `
+    <p class="eyebrow">Your scores</p>
+    <div class="score-grid">${SECS.map((s,i) => `
+      <div class="score-card">
+        <div class="score-name">${s.title}</div>
+        <div class="score-num" style="color:${s.color}">${scores[i]}%</div>
+        <div class="score-bar"><div class="score-fill" style="width:${scores[i]}%;background:${s.color}"></div></div>
+      </div>`).join('')}
+    </div>
+
+    <div class="divider"></div>
+    <p class="eyebrow">Your 90-day growth plan</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Focused on your two growth areas: <strong>${low1}</strong> and <strong>${low2}</strong></p>
+
+    ${generatedPlan
+      ? `<div class="plan-card"><div class="plan-content">${esc(generatedPlan)}</div></div>`
+      : `<div class="plan-card"><p style="font-size:14px;color:var(--muted);line-height:1.7;">Your plan could not be generated right now. Share your answer report below with your coach and they can prepare your plan.</p></div>`
+    }
+
+    <div class="info-box" style="margin-top:4px;">
+      <strong>Next step: share this with your coach.</strong><br>
+      Your full answer report is below. Copy or print it and send it to your coach so they can prepare your coaching guide.
+    </div>
+
+    <div class="divider"></div>
+    <p class="eyebrow">Full answer report \u2014 for your coach</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Forward this to your coach exactly as it appears.</p>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;">
+      <p style="font-size:14px;font-weight:500;margin-bottom:4px;">${coacheeName} \u2014 Discipleship Growth Assessment</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Completed: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${SECS.map((s,i) => `<span style="font-size:12px;padding:3px 10px;border-radius:99px;background:var(--primary-light);color:var(--primary)">${s.title}: ${scores[i]}%</span>`).join('')}
+      </div>
+    </div>
+
+    ${SECS.map((sec,si) => `
+      <div class="report-section">
+        <div class="report-title">${sec.title} \u2014 ${scores[si]}%</div>
+        ${sec.questions.map((q,qi) => `
+          <div class="answer-row">
+            <div class="answer-q">${q}</div>
+            <div class="answer-score a${answers[si][qi]}">${answers[si][qi]}/5</div>
+          </div>`).join('')}
+      </div>`).join('')}
+
+    <div class="no-print" style="margin-top:16px;">
+      <button class="btn-primary" onclick="window.print()">Print or save as PDF</button>
+      <button class="btn-outline" id="btn-copy" onclick="copyReport()">Copy report to send to coach</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6;" class="no-print">On your phone: tap Print and choose \u201cSave as PDF\u201d to create a shareable file.</p>
+    <div style="height:40px;"></div>
+  `;
+}
+
+function esc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyReport() {
+  const scores = SECS.map((_,i) => score(i));
+  let t = `DISCIPLESHIP GROWTH ASSESSMENT\n${coacheeName} \u2014 ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}\n\n`;
+  t += `SCORES:\n${SECS.map((s,i) => `${s.title}: ${scores[i]}%`).join('\n')}\n\n`;
+  t += `DETAILED ANSWERS (1 = Rarely true, 5 = Very true)\n\n`;
+  SECS.forEach((sec,si) => {
+    t += `${sec.title.toUpperCase()} \u2014 ${scores[si]}%\n`;
+    sec.questions.forEach((q,qi) => { t += `Q: ${q}\nAnswer: ${answers[si][qi]}/5\n\n`; });
+  });
+  if (generatedPlan) t += `\n90-DAY GROWTH PLAN\n\n${generatedPlan}`;
+  navigator.clipboard.writeText(t).then(() => {
+    const b = document.getElementById('btn-copy');
+    b.textContent = 'Copied!';
+    setTimeout(() => { b.textContent = 'Copy report to send to coach'; }, 3000);
+  }).catch(() => alert('Please use Print \u2192 Save as PDF to share your report.'));
+}
+</script>
+</body>
+</html>
